@@ -1,0 +1,10 @@
+# Versions used for the paper's experiments.
+accelerate==1.6.0
+datasets==3.6.0
+deepspeed==0.15.4
+flash-attn==2.7.4.post1
+openai==1.74.0
+torch==2.6.0
+transformers==4.51.3
+trl==0.18.1
+vllm==0.8.4
