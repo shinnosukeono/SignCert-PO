@@ -3,8 +3,7 @@
 # SFT -> response pairs -> preference labels -> proxy RM -> SignCert-PO -> win rate.
 #
 # Usage: bash scripts/run.sh <setting> [seed]
-#   <setting>: tldr_pythia1b, tldr_pythia2.8b, tldr_qwen1.5b, tldr_qwen3b,
-#              alpaca_qwen1.5b, alpaca_qwen3b
+#   <setting>: tldr_pythia1b
 # Labeling with GPT-4.1 Nano reads the API key from OPENAI_API_KEY.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -23,27 +22,12 @@ ALPACA_QWEN=shinnosukeono/alpaca_farm_preprocessing_1771395192
 case $SETTING in
 tldr_pythia1b)
     MODEL=EleutherAI/pythia-1b-deduped DATA=$TLDR_PYTHIA TASK=tldr LABELER=skywork
-    PAIRS=1 RM_EPOCHS=1 RM_BATCH=16 TOKENS=53 BETA=0.01 Q=0.4 STEPS=2000 ;;
-tldr_pythia2.8b)
-    MODEL=EleutherAI/pythia-2.8b-deduped DATA=$TLDR_PYTHIA TASK=tldr LABELER=gpt-4.1-nano
-    PAIRS=1 RM_EPOCHS=1 RM_BATCH=16 TOKENS=53 BETA=0.005 Q=0.2 STEPS=2000
-    # vLLM 0.8.4 has no FlashAttention-2 kernel for Pythia-2.8B's head size 80.
-    export VLLM_ATTENTION_BACKEND=FLEX_ATTENTION ;;
-tldr_qwen1.5b)
-    MODEL=Qwen/Qwen2.5-1.5B DATA=$TLDR_QWEN TASK=tldr LABELER=skywork
-    PAIRS=1 RM_EPOCHS=1 RM_BATCH=16 TOKENS=53 BETA=0.1 Q=__TODO__ STEPS=500 ;;
-tldr_qwen3b)
-    MODEL=Qwen/Qwen2.5-3B DATA=$TLDR_QWEN TASK=tldr LABELER=gpt-4.1-nano
-    PAIRS=1 RM_EPOCHS=1 RM_BATCH=4 TOKENS=53 BETA=0.01 Q=0.25 STEPS=500 ;;
-alpaca_qwen1.5b)
-    MODEL=Qwen/Qwen2.5-1.5B DATA=$ALPACA_QWEN TASK=alpaca LABELER=skywork
-    PAIRS=3 RM_EPOCHS=3 RM_BATCH=16 TOKENS=128 BETA=0.01 Q=0.5 STEPS=500 ;;
-alpaca_qwen3b)
-    MODEL=Qwen/Qwen2.5-3B DATA=$ALPACA_QWEN TASK=alpaca LABELER=gpt-4.1-nano
-    PAIRS=3 RM_EPOCHS=3 RM_BATCH=4 TOKENS=128 BETA=0.1 Q=0.25 STEPS=500 ;;
+    PAIRS=1 RM_EPOCHS=1 RM_BATCH=16 TOKENS=53 BETA=0.01 Q=0.4 STEPS=2000
+    ;;
 *)
     echo "unknown setting: $SETTING" >&2
-    exit 1 ;;
+    exit 1
+    ;;
 esac
 
 $LAUNCH sft.py --base_model $MODEL --dataset $DATA --output_dir $OUT/sft --seed $SEED
